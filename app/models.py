@@ -15,6 +15,9 @@ class Task(TaskBase, table=True):
     updated_at: datetime | None = None
 
 
+""" TASKS """
+
+
 class TaskCreate(TaskBase):
     pass
 
@@ -29,3 +32,26 @@ class TaskPublic(TaskBase):
     id: int
     created_at: datetime
     updated_at: datetime | None
+
+
+""" USERS """
+
+
+class UserBase(SQLModel):
+    username: str = Field(unique=True, index=True)
+    email: str = Field(unique=True, index=True)
+
+
+class User(UserBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    hashed_password: str
+
+
+class UserCreate(SQLModel):
+    username: str
+    email: str
+    password: str
+
+
+class UserPublic(UserBase):
+    id: int
