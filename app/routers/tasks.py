@@ -4,15 +4,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from app.database import get_session
-from app.models import Task, TaskCreate, TaskUpdate, TaskPublic
+from app.models import Task, TaskCreate, TaskPublic, TaskUpdate
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
 """ READ """
+
+
 @router.get("/", response_model=list[TaskPublic])
-def list_tasks(session: SessionDep, skip: int = 0, limit: int = Query(default=20, le=100)):
+def list_tasks(
+    session: SessionDep, skip: int = 0, limit: int = Query(default=20, le=100)
+):
     tasks = session.exec(select(Task).offset(skip).limit(limit)).all()
     return tasks
 
@@ -26,6 +30,8 @@ def get_task(task_id: int, session: SessionDep):
 
 
 """ CREATE """
+
+
 @router.post("/", response_model=TaskPublic, status_code=201)
 def create_task(payload: TaskCreate, session: SessionDep):
     task = Task.model_validate(payload)
@@ -36,6 +42,8 @@ def create_task(payload: TaskCreate, session: SessionDep):
 
 
 """ UPDATE """
+
+
 @router.patch("/{task_id}", response_model=TaskPublic)
 def update_task(task_id: int, payload: TaskUpdate, session: SessionDep):
     task = session.get(Task, task_id)
@@ -50,6 +58,8 @@ def update_task(task_id: int, payload: TaskUpdate, session: SessionDep):
 
 
 """ DELETE """
+
+
 @router.delete("/{task_id}")
 def delete_task(task_id: int, session: SessionDep):
     task = session.get(Task, task_id)

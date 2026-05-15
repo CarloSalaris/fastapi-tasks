@@ -1,2 +1,11 @@
 [tool.fastapi]
 entrypoint = "app.main:app"
+
+[tool.ruff]
+  line-length = 88
+
+  [tool.ruff.lint]
+  select = ["E", "F", "I"]   # errori stile, errori Python, import sorting
+
+  [tool.ruff.format]
+  quote-style = "double"
