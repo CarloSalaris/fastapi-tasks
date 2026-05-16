@@ -31,6 +31,7 @@ class TaskUpdate(SQLModel):
 
 class TaskPublic(TaskBase):
     id: int
+    user_id: int
     created_at: datetime
     updated_at: datetime | None
 
