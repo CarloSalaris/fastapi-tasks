@@ -29,10 +29,31 @@ API docs: http://localhost:8000/docs
 
 ## Endpoints
 
-| Method | Endpoint        | Description       |
-|--------|-----------------|-------------------|
-| GET    | /tasks          | List all tasks    |
-| GET    | /tasks/{id}     | Get a single task |
-| POST   | /tasks          | Create a task     |
-| PATCH  | /tasks/{id}     | Update a task     |
-| DELETE | /tasks/{id}     | Delete a task     |
+### Auth
+
+| Method | Endpoint       | Auth   | Description             |
+| ------ | -------------- | ------ | ----------------------- |
+| POST   | /auth/register | Public | Register a new user     |
+| POST   | /auth/token    | Public | Login and get JWT token |
+
+### Tasks
+
+| Method | Endpoint    | Auth | Description                   |
+| ------ | ----------- | ---- | ----------------------------- |
+| GET    | /tasks      | User | List own tasks (all if admin) |
+| GET    | /tasks/{id} | User | Get a single task             |
+| POST   | /tasks      | User | Create a task                 |
+| PATCH  | /tasks/{id} | User | Update a task                 |
+| DELETE | /tasks/{id} | User | Delete a task                 |
+
+### Users
+
+| Method | Endpoint    | Auth  | Description             |
+| ------ | ----------- | ----- | ----------------------- |
+| GET    | /users      | Admin | List all users          |
+| GET    | /users/me   | User  | Get own profile         |
+| PATCH  | /users/me   | User  | Update own profile      |
+| GET    | /users/{id} | Admin | Get a user by ID        |
+| POST   | /users      | Admin | Create a user with role |
+| PATCH  | /users/{id} | Admin | Update a user           |
+| DELETE | /users/{id} | Admin | Delete a user           |
