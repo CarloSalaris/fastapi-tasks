@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
-from app.auth import get_admin_user, hash_password
+from app.auth import get_admin_user, get_current_user, hash_password
 from app.database import get_session
 from app.models import User, UserCreate, UserPublic, UserRole, UserUpdate
 
@@ -11,6 +11,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 SessionDep = Annotated[Session, Depends(get_session)]
 AdminUser = Annotated[User, Depends(get_admin_user)]
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @router.get("/", response_model=list[UserPublic])
@@ -21,6 +22,24 @@ def list_users(
     limit: int = Query(default=20, le=100),
 ):
     return session.exec(select(User).offset(skip).limit(limit)).all()
+
+
+@router.get("/me", response_model=UserPublic)
+def get_me(current_user: CurrentUser):
+    return current_user
+
+
+@router.patch("/me", response_model=UserPublic)
+def update_me(payload: UserUpdate, session: SessionDep, current_user: CurrentUser):
+    if payload.role is not None:
+        raise HTTPException(status_code=403, detail="Cannot change own role")
+
+    user_data = payload.model_dump(exclude_unset=True)
+    current_user.sqlmodel_update(user_data)
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+    return current_user
 
 
 @router.get("/{user_id}", response_model=UserPublic)
