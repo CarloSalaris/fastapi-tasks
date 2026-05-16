@@ -9,7 +9,7 @@ from pwdlib import PasswordHash
 from sqlmodel import Session, select
 
 from app.database import get_session
-from app.models import User
+from app.models import User, UserRole
 
 SECRET_KEY = "1dc7abfc256e0f4878c1fa9994301b098e4f3858936e98fe8c4be000cc4eb180"
 ALGORITHM = "HS256"
@@ -58,3 +58,9 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def get_admin_user(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+    if current_user.role != UserRole.admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user

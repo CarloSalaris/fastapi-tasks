@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from sqlmodel import SQLModel
 
 from app.database import engine
-from app.routers import auth, tasks
+from app.routers import auth, tasks, users
 
 
 @asynccontextmanager
@@ -20,5 +20,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(tasks.router)
 app.include_router(auth.router)
+app.include_router(tasks.router)
+app.include_router(users.router)

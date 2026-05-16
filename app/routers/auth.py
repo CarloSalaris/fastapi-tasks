@@ -12,7 +12,7 @@ from app.auth import (
     verify_password,
 )
 from app.database import get_session
-from app.models import User, UserCreate, UserPublic
+from app.models import User, UserCreate, UserPublic, UserRole
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -31,10 +31,14 @@ def register(payload: UserCreate, session: SessionDep):
             status_code=409, detail="Email or username already registered"
         )
 
+    # First user becomes admin
+    is_first_user = session.exec(select(User)).first() is None
+
     user = User(
         email=payload.email,
         username=payload.username,
         hashed_password=hash_password(payload.password),
+        role=UserRole.admin if is_first_user else UserRole.user,
     )
     session.add(user)
     session.commit()
@@ -60,8 +64,3 @@ def login(
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-@router.get("/users", response_model=list[UserPublic])
-def list_users(session: SessionDep):
-    return session.exec(select(User)).all()
