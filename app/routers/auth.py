@@ -60,3 +60,8 @@ def login(
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/users", response_model=list[UserPublic])
+def list_users(session: SessionDep):
+    return session.exec(select(User)).all()
