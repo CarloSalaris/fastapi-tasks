@@ -7,7 +7,7 @@ from alembic import context
 from app.config import settings
 
 # Import all models so SQLModel registers them
-from app.models import Task, User  # noqa
+from app.models import Project, Task, User  # noqa
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

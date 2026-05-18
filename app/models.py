@@ -3,6 +3,37 @@ from enum import Enum
 
 from sqlmodel import Field, SQLModel
 
+""" PROJECTS """
+
+
+class ProjectBase(SQLModel):
+    name: str
+    description: str | None = None
+    color: str | None = None
+
+
+class Project(ProjectBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.now)
+    user_id: int = Field(foreign_key="user.id")
+
+
+class ProjectCreate(ProjectBase):
+    pass
+
+
+class ProjectUpdate(SQLModel):
+    name: str | None = None
+    description: str | None = None
+    color: str | None = None
+
+
+class ProjectPublic(ProjectBase):
+    id: int
+    created_at: datetime
+    user_id: int
+
+
 """ TASKS """
 
 
@@ -10,6 +41,9 @@ class TaskBase(SQLModel):
     title: str
     description: str | None = None
     completed: bool = False
+    project_id: int | None = Field(
+        default=None, foreign_key="project.id"
+    )  # for now it's optional. A task can exist without a project
 
 
 class Task(TaskBase, table=True):
@@ -27,6 +61,7 @@ class TaskUpdate(SQLModel):
     title: str | None = None
     description: str | None = None
     completed: bool | None = None
+    project_id: int | None = None
 
 
 class TaskPublic(TaskBase):
