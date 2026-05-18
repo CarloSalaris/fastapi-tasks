@@ -1,10 +1,9 @@
 from datetime import datetime
 from enum import Enum
-
-from sqlmodel import Field, SQLModel
-from pydantic import BaseModel
 from typing import Literal
 
+from pydantic import BaseModel
+from sqlmodel import Field, SQLModel
 
 """ PROJECTS """
 
@@ -59,7 +58,7 @@ class Task(TaskBase, table=True):
 
 
 class TaskCreate(TaskBase):
-    pass
+    user_id: int | None = None
 
 
 class TaskUpdate(SQLModel):
@@ -68,6 +67,7 @@ class TaskUpdate(SQLModel):
     completed: bool | None = None
     due_date: datetime | None = None
     project_id: int | None = None
+    user_id: int | None = None
 
 
 class TaskPublic(TaskBase):
