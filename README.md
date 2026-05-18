@@ -1,6 +1,6 @@
 # FastAPI Tasks API
 
-A simple CRUD REST API for task management, built with FastAPI and SQLModel.
+A simple CRUD REST API for task management, organized into projects, built with FastAPI and SQLModel.
 
 ## Tech Stack
 
@@ -8,6 +8,9 @@ A simple CRUD REST API for task management, built with FastAPI and SQLModel.
 - FastAPI
 - SQLModel (SQLAlchemy + Pydantic)
 - SQLite
+- Alembic (database migrations)
+- pydantic-settings (environment configuration)
+- pytest (test suite)
 
 ## Setup
 
@@ -19,6 +22,25 @@ source venv/Scripts/activate  # Windows Git Bash
 pip install -r requirements.txt
 ```
 
+Copy the example env file and fill in the required values:
+
+```bash
+cp .env.example .env
+```
+
+| Variable                      | Default               | Description                   |
+| ----------------------------- | --------------------- | ----------------------------- |
+| `SECRET_KEY`                  | _(required)_          | JWT signing secret            |
+| `DATABASE_URL`                | `sqlite:///./test.db` | SQLAlchemy database URL       |
+| `ALGORITHM`                   | `HS256`               | JWT algorithm                 |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30`                  | JWT token lifetime in minutes |
+
+## Database migrations
+
+```bash
+alembic upgrade head
+```
+
 ## Run
 
 ```bash
@@ -26,6 +48,12 @@ fastapi dev
 ```
 
 API docs: http://localhost:8000/docs
+
+## Tests
+
+```bash
+pytest
+```
 
 ## Endpoints
 
@@ -35,6 +63,16 @@ API docs: http://localhost:8000/docs
 | ------ | -------------- | ------ | ----------------------- |
 | POST   | /auth/register | Public | Register a new user     |
 | POST   | /auth/token    | Public | Login and get JWT token |
+
+### Projects
+
+| Method | Endpoint       | Auth | Description                      |
+| ------ | -------------- | ---- | -------------------------------- |
+| GET    | /projects      | User | List own projects (all if admin) |
+| GET    | /projects/{id} | User | Get a single project             |
+| POST   | /projects      | User | Create a project                 |
+| PATCH  | /projects/{id} | User | Update a project                 |
+| DELETE | /projects/{id} | User | Delete a project                 |
 
 ### Tasks
 
