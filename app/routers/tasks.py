@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from app.auth import get_current_user
 from app.database import get_session
-from app.models import Task, TaskCreate, TaskPublic, TaskUpdate, User, UserRole
+from app.models import Task, TaskCreate, TaskFilters, TaskPublic, TaskUpdate, User, UserRole
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -20,18 +20,18 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 def list_tasks(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = Query(default=20, le=100),
+    filters: TaskFilters = Depends(),
 ):
     query = select(Task)
 
-    if current_user.role == UserRole.admin:
-        pass  # admin can see all tasks
-    else:
+    if current_user.role != UserRole.admin:
         query = query.where(Task.user_id == current_user.id)
 
-    tasks = session.exec(query.offset(skip).limit(limit)).all()
-    return tasks
+    if current_user.role != UserRole.admin:
+        query = query.where(Task.user_id == current_user.id)
+
+    task = session.exec(filters.apply(query)).all()
+    return task
 
 
 @router.get("/{task_id}", response_model=TaskPublic)
