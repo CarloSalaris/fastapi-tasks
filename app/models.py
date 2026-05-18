@@ -30,6 +30,7 @@ class ProjectUpdate(SQLModel):
 
 class ProjectPublic(ProjectBase):
     id: int
+    name: str
     created_at: datetime
     user_id: int
 
@@ -41,6 +42,7 @@ class TaskBase(SQLModel):
     title: str
     description: str | None = None
     completed: bool = False
+    due_date: datetime | None = None
     project_id: int | None = Field(
         default=None, foreign_key="project.id"
     )  # for now it's optional. A task can exist without a project
@@ -61,14 +63,17 @@ class TaskUpdate(SQLModel):
     title: str | None = None
     description: str | None = None
     completed: bool | None = None
+    due_date: datetime | None = None
     project_id: int | None = None
 
 
 class TaskPublic(TaskBase):
     id: int
     user_id: int
+    project_id: int | None
     created_at: datetime
     updated_at: datetime | None
+    due_date: datetime | None
 
 
 """ USERS """
