@@ -8,12 +8,13 @@ from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.database import get_session
 from app.models import User, UserRole
 
-SECRET_KEY = "1dc7abfc256e0f4878c1fa9994301b098e4f3858936e98fe8c4be000cc4eb180"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
