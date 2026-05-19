@@ -5,11 +5,11 @@ from sqlmodel import Session, select
 
 from app.auth import get_current_user
 from app.database import get_session
+from app.filters import TaskFilters
 from app.models import (
     Project,
     Task,
     TaskCreate,
-    TaskFilters,
     TaskPublic,
     TaskUpdate,
     User,
@@ -33,7 +33,7 @@ def list_tasks(
 ):
     query = select(Task)
 
-    if current_user.role != UserRole.admin:
+    if current_user.role != UserRole.admin:  # admin can see all tasks
         query = query.where(Task.user_id == current_user.id)
 
     task = session.exec(filters.apply(query)).all()
