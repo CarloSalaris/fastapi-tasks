@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.models import Task
+from app.models import Project, Task, User
 
 # Query parameters for filtering and sorting.
 #
@@ -49,4 +49,59 @@ class TaskFilters(BaseModel):
             sort_column.desc() if self.order == "desc" else sort_column.asc()
         )
 
+        return query.offset(self.skip).limit(self.limit)
+
+
+class ProjectFilters(BaseModel):
+    # --- Filters (must match Project column names) ---
+    user_id: int | None = None
+    name: str | None = None
+    description: str | None = None
+    color: str | None = None
+
+    # --- Sorting ---
+    sort: Literal[
+        "created_at",
+        "updated_at",
+        "name",
+        "description",
+        "color",
+        "user_id",
+    ] = "created_at"
+    order: Literal["asc", "desc"] = "desc"
+
+    # --- Pagination ---
+    skip: int = 0
+    limit: int = 20
+
+    def apply(self, query):
+        sort_column = getattr(Project, self.sort)
+        query = query.order_by(
+            sort_column.desc() if self.order == "desc" else sort_column.asc()
+        )
+        return query.offset(self.skip).limit(self.limit)
+
+
+class UserFilters(BaseModel):
+    # --- Filters (must match User column names) ---
+    role: str | None = None
+    username: str | None = None
+
+    # --- Sorting ---
+    sort: Literal[
+        "created_at",
+        "updated_at",
+        "role",
+    ] = "created_at"
+    order: Literal["asc", "desc"] = "desc"
+
+    # --- Pagination ---
+    skip: int = 0
+    limit: int = 20
+
+    def apply(self, query):
+        sort_column = getattr(User, self.sort)
+        query = query.order_by(
+            sort_column.desc() if self.order == "desc" else sort_column.asc()
+        )
         return query.offset(self.skip).limit(self.limit)

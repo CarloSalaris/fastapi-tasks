@@ -1,10 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.auth import get_admin_user, get_current_user, hash_password
 from app.database import get_session
+from app.filters import UserFilters
 from app.models import User, UserCreate, UserPublic, UserRole, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -18,10 +19,9 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 def list_users(
     session: SessionDep,
     admin: AdminUser,
-    skip: int = 0,
-    limit: int = Query(default=20, le=100),
+    filters: UserFilters = Depends(),
 ):
-    return session.exec(select(User).offset(skip).limit(limit)).all()
+    return session.exec(filters.apply(select(User))).all()
 
 
 @router.get("/me", response_model=UserPublic)

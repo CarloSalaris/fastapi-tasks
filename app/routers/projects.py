@@ -1,10 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.auth import get_current_user
 from app.database import get_session
+from app.filters import ProjectFilters
 from app.models import (
     Project,
     ProjectCreate,
@@ -28,15 +29,14 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 def list_projects(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = Query(default=20, le=100),
+    filters: ProjectFilters = Depends(),
 ):
     query = select(Project)
 
     if current_user.role != UserRole.admin:  # admin can see all projects
         query = query.where(Project.user_id == current_user.id)
 
-    projects = session.exec(query.offset(skip).limit(limit)).all()
+    projects = session.exec(filters.apply(query)).all()
     return projects
 
 
