@@ -28,12 +28,12 @@ Copy the example env file and fill in the required values:
 cp .env.example .env
 ```
 
-| Variable                      | Default               | Description                   |
-| ----------------------------- | --------------------- | ----------------------------- |
-| `SECRET_KEY`                  | _(required)_          | JWT signing secret            |
-| `DATABASE_URL`                | `sqlite:///./test.db` | SQLAlchemy database URL       |
-| `ALGORITHM`                   | `HS256`               | JWT algorithm                 |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30`                  | JWT token lifetime in minutes |
+| Variable                      | Default                   | Description                   |
+| ----------------------------- | ------------------------- | ----------------------------- |
+| `SECRET_KEY`                  | _(required)_              | JWT signing secret            |
+| `DATABASE_URL`                | `sqlite:///./database.db` | SQLAlchemy database URL       |
+| `ALGORITHM`                   | `HS256`                   | JWT algorithm                 |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30`                      | JWT token lifetime in minutes |
 
 ## Database migrations
 
@@ -74,6 +74,19 @@ pytest
 | PATCH  | /projects/{id} | User | Update a project                 |
 | DELETE | /projects/{id} | User | Delete a project                 |
 
+#### Project filters
+
+| Param         | Type   | Description                                                           |
+| ------------- | ------ | --------------------------------------------------------------------- |
+| `user_id`     | int    | Filter by owner (admin only)                                          |
+| `name`        | string | Filter by name                                                        |
+| `description` | string | Filter by description                                                 |
+| `color`       | string | Filter by color                                                       |
+| `sort`        | string | `created_at`, `updated_at`, `name`, `description`, `color`, `user_id` |
+| `order`       | string | `asc`, `desc`                                                         |
+| `skip`        | int    | Offset (default 0)                                                    |
+| `limit`       | int    | Max results (default 20)                                              |
+
 ### Tasks
 
 | Method | Endpoint    | Auth | Description                   |
@@ -83,6 +96,18 @@ pytest
 | POST   | /tasks      | User | Create a task                 |
 | PATCH  | /tasks/{id} | User | Update a task                 |
 | DELETE | /tasks/{id} | User | Delete a task                 |
+
+#### Task filters
+
+| Param        | Type   | Description                       |
+| ------------ | ------ | --------------------------------- |
+| `completed`  | bool   | Filter by status                  |
+| `project_id` | int    | Filter by project                 |
+| `user_id`    | int    | Filter by assigned user           |
+| `sort`       | string | `created_at`, `due_date`, `title` |
+| `order`      | string | `asc`, `desc`                     |
+| `skip`       | int    | Offset (default 0)                |
+| `limit`      | int    | Max results (default 20)          |
 
 ### Users
 
@@ -95,3 +120,14 @@ pytest
 | POST   | /users      | Admin | Create a user with role |
 | PATCH  | /users/{id} | Admin | Update a user           |
 | DELETE | /users/{id} | Admin | Delete a user           |
+
+#### User filters
+
+| Param      | Type   | Description                        |
+| ---------- | ------ | ---------------------------------- |
+| `role`     | string | Filter by role (`admin`, `user`)   |
+| `username` | string | Filter by username                 |
+| `sort`     | string | `created_at`, `updated_at`, `role` |
+| `order`    | string | `asc`, `desc`                      |
+| `skip`     | int    | Offset (default 0)                 |
+| `limit`    | int    | Max results (default 20)           |
