@@ -21,13 +21,14 @@ class Project(ProjectBase, table=True):
 
 
 class ProjectCreate(ProjectBase):
-    pass
+    user_id: int | None = None
 
 
 class ProjectUpdate(SQLModel):
     name: str | None = None
     description: str | None = None
     color: str | None = None
+    user_id: int | None = None
 
 
 class ProjectPublic(ProjectBase):

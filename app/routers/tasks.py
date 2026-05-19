@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 from app.auth import get_current_user
 from app.database import get_session
 from app.models import (
+    Project,
     Task,
     TaskCreate,
     TaskFilters,
@@ -35,9 +36,6 @@ def list_tasks(
     if current_user.role != UserRole.admin:
         query = query.where(Task.user_id == current_user.id)
 
-    if current_user.role != UserRole.admin:
-        query = query.where(Task.user_id == current_user.id)
-
     task = session.exec(filters.apply(query)).all()
     return task
 
@@ -45,7 +43,9 @@ def list_tasks(
 @router.get("/{task_id}", response_model=TaskPublic)
 def get_task(task_id: int, session: SessionDep, current_user: CurrentUser):
     task = session.get(Task, task_id)
-    if not task or task.user_id != current_user.id:
+    if not task or (
+        task.user_id != current_user.id and current_user.role != UserRole.admin
+    ):
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
@@ -86,6 +86,14 @@ def update_task(
         raise HTTPException(
             status_code=403, detail="Only admins can reassign tasks to other users"
         )
+
+    # If reassigning a task, remove it from its current project
+    # (a task can't belong to a project owned by a different user)
+    if payload.user_id is not None and task.project_id is not None:
+        project = session.get(Project, task.project_id)
+        if project and project.user_id != payload.user_id:
+            task.project_id = None
+
     task_data = payload.model_dump(exclude_unset=True)
     task.sqlmodel_update(task_data)
     session.add(task)
@@ -100,7 +108,9 @@ def update_task(
 @router.delete("/{task_id}")
 def delete_task(task_id: int, session: SessionDep, current_user: CurrentUser):
     task = session.get(Task, task_id)
-    if not task or task.user_id != current_user.id:
+    if not task or (
+        task.user_id != current_user.id and current_user.role != UserRole.admin
+    ):
         raise HTTPException(status_code=404, detail="Task not found")
     session.delete(task)
     session.commit()
