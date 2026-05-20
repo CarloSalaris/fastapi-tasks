@@ -92,8 +92,9 @@ class UserFilters(BaseModel):
         "created_at",
         "updated_at",
         "role",
-    ] = "created_at"
-    order: Literal["asc", "desc"] = "desc"
+        "username",
+    ] = "username"
+    order: Literal["asc", "desc"] = "asc"
 
     # --- Pagination ---
     skip: int = 0

@@ -68,3 +68,22 @@ def admin_headers_fixture(client: TestClient, session: Session):
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture(name="second_user_headers")
+def second_user_headers_fixture(client: TestClient, session: Session):
+    user = User(
+        username="seconduser",
+        email="second@example.com",
+        hashed_password=hash_password("secondpass123"),
+        role=UserRole.user,
+    )
+    session.add(user)
+    session.commit()
+
+    response = client.post(
+        "/auth/token",
+        data={"username": "seconduser", "password": "secondpass123"},
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from sqlmodel import Session, or_, select
 
 from app.auth import get_current_user
 from app.database import get_session
@@ -33,8 +33,17 @@ def list_projects(
 ):
     query = select(Project)
 
-    if current_user.role != UserRole.admin:  # admin can see all projects
-        query = query.where(Project.user_id == current_user.id)
+    if current_user.role != UserRole.admin:
+        # Projects I own OR projects where I have tasks assigned
+        my_projects_ids = select(Task.project_id).where(
+            Task.user_id == current_user.id, Task.project_id.is_not(None)
+        )
+        query = query.where(
+            or_(
+                Project.user_id == current_user.id,
+                Project.id.in_(my_projects_ids),
+            )
+        )
 
     projects = session.exec(filters.apply(query)).all()
     return projects
@@ -43,10 +52,19 @@ def list_projects(
 @router.get("/{project_id}", response_model=ProjectPublic)
 def get_project(project_id: int, session: SessionDep, current_user: CurrentUser):
     project = session.get(Project, project_id)
-    if not project or (
-        project.user_id != current_user.id and current_user.role != UserRole.admin
-    ):
+    if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    if current_user.role != UserRole.admin:
+        has_tasks = session.exec(
+            select(Task.id).where(
+                Task.project_id == project_id, Task.user_id == current_user.id
+            )
+        ).first()
+
+        if current_user.id != project.user_id and not has_tasks:
+            raise HTTPException(status_code=404, detail="Project not found")
+        # 404 instead of 403 so we don't reveal the existence of the project
     return project
 
 
